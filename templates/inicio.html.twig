@@ -1,0 +1,268 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block body %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .custom-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+        }
+
+        .custom-header-center {
+            flex: 3;
+            text-align: center;
+        }
+
+        .custom-header span {
+            font-weight: bold;
+        }
+
+        .custom-header-right a {
+            background-color: #dc3545;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            width: 150px; 
+            text-align: center; 
+            display: inline-block; 
+        }
+
+        .custom-header-right a:hover {
+            background-color: #c82333;
+        }
+
+        #crearTareaForm {
+            text-align: center; 
+            margin-top: 20px;
+        }
+
+        #texto {
+            width: 88%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-right: 10px; 
+            height: 35px;
+        }
+
+        #crearTareaForm button {
+            background-color: #28a745; 
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            height: 55px;
+            cursor: pointer;
+            width: 150px; 
+            transition: background-color 0.3s ease;
+            font-size: 17px;
+
+        }
+
+        #crearTareaForm button:hover {
+            background-color: #218838; 
+        }
+
+        #listaTareas {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tarjetaTarea {
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 10px;
+            width: calc(33.33% - 20px); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative; 
+            word-wrap: break-word; 
+            overflow-wrap: break-word;
+        }
+
+        .tarjetaTarea h4 {
+            margin-top: 0;
+        }
+
+        .eliminarTarea {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+			color: #625c5c;
+        }
+		.eliminarTarea:hover {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+			color: #ff0000;
+        }
+		.checkTarea {
+            position: absolute;
+            top: 10px;
+            right: 35px;
+            cursor: pointer;
+			color: #625c5c;
+        }
+		.checkTarea:hover {
+            position: absolute;
+            top: 10px;
+            right: 35px;
+            cursor: pointer;
+			color: #00d143;
+        }
+		
+    </style>
+
+    <header>
+        <div class="custom-header">
+            <div class="custom-header-left">
+                <span>Bienvenido, {{ usuario.nombre }}</span>
+            </div>
+            <div class="custom-header-center">
+                <h1>Listado de Tareas</h1>
+            </div>
+            <div class="custom-header-right">
+                <a href="{{ path('cerrar_sesion') }}" class="btn btn-danger">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <form id="crearTareaForm">
+            <input type="text" id="texto" placeholder="Escribe aquí tu tarea...">
+            <button type="submit" id="botonNuevaTarea">Crear Tarea</button>
+        </form>
+
+        <ul id="listaTareas">
+            {% for tarea in tareas %}
+                <li class="tarjetaTarea {% if tarea.realizada == 1 %}tareaRealizada{% endif %}">
+                    <h4 {% if tarea.realizada == 1 %}style="text-decoration: line-through;"{% endif %}>{{ tarea.texto }}</h4>
+                    <span class="checkTarea" data-id="{{ tarea.id }}"><i class="fa fa-check"></i></span>
+                    <span class="eliminarTarea" data-id="{{ tarea.id }}"><i class="fa fa-trash"></i></span>
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+
+ document.getElementById('botonNuevaTarea').addEventListener('click', function () {
+
+            var texto = document.getElementById('texto').value;
+
+            if (!texto.trim()) {
+                alert('Por favor, ingresa el texto de la tarea.');
+                return; 
+            }
+
+            fetch('{{ path('crear_tarea_ajax') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ texto: texto })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var capaTarea = document.createElement('div');
+                var capaTexto = document.createElement('div');
+                var tick = document.createElement('i');
+                var papelera = document.createElement('i');
+
+                capaTarea.classList.add('tarea');
+                capaTexto.classList.add('texto');
+                capaTexto.innerHTML = data.texto;
+                tick.classList.add('fa-solid', 'fa-check', 'tick');
+                tick.setAttribute('data-idTarea', data.id);
+                papelera.classList.add('fa-solid', 'fa-trash', 'papelera');
+                papelera.setAttribute('data-idTarea', data.id);
+
+                capaTarea.appendChild(tick);
+                capaTarea.appendChild(capaTexto);
+                capaTarea.appendChild(papelera);
+
+                document.getElementById('listaTareas').appendChild(capaTarea);
+
+                papelera.addEventListener('click', manejadorBorrar);
+
+                tick.addEventListener('click', manejadorRealizada);
+
+                document.getElementById('texto').value = '';
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+            });
+        });
+
+        function manejadorBorrar() {
+                var id = this.getAttribute('data-id');
+
+                fetch('{{ path('eliminar_tarea_ajax') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        this.closest('.tarjetaTarea').remove();
+                    } else {
+                        console.error('Error al eliminar la tarea:', response.statusText);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            document.querySelectorAll('.eliminarTarea').forEach(btn => {
+                btn.addEventListener('click', manejadorBorrar);
+            });
+             function manejadorRealizada() {
+                var id = this.getAttribute('data-id');
+
+                fetch('{{ path('marcar_tarea_ajax') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        var tareaElement = this.closest('.tarjetaTarea');
+                        tareaElement.classList.toggle('tareaRealizada');
+                        var tareaTextoElement = tareaElement.querySelector('h4');
+                        tareaTextoElement.style.textDecoration = tareaTextoElement.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+                    } else {
+                        console.error('Error al marcar la tarea:', response.statusText);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            document.querySelectorAll('.checkTarea').forEach(btn => {
+                btn.addEventListener('click', manejadorRealizada);
+            });
+
+    </script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Registro
+{% endblock %}
+
+
+{% block body %}
+<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f8f9fa;
+		}
+
+		.container {
+			margin-top: 50px;
+		}
+
+		.form-container {
+			background-color: #ffffff;
+			border: 1px solid #ced4da;
+			border-radius: 5px;
+			padding: 30px;
+		}
+
+		.form-title {
+			margin-bottom: 30px;
+			text-align: center;
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+		.form-label {
+			font-weight: bold;
+		}
+
+		.form-control {
+			width: 100%;
+			padding: 10px;
+			border: 1px solid #ced4da;
+			border-radius: 5px;
+		}
+
+		.form-control:focus {
+			border-color: #80bdff;
+			box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+		}
+
+		.btn {
+			background-color: #007bff;
+			color: #ffffff;
+			border: none;
+			border-radius: 5px;
+			padding: 10px 20px;
+			cursor: pointer;
+		}
+
+		.btn:hover {
+			background-color: #0056b3;
+		}
+	</style>
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-6 form-container">
+				<h1 class="form-title">Registro</h1>
+
+				{{ form_errors(registrationForm) }}
+
+				{{ form_start(registrationForm, {'action': path('registro'), 'attr': {'class': 'form'}}) }}
+				<div class="form-group">
+					{{ form_label(registrationForm.nombre, 'Nombre', {'label_attr': {'class': 'form-label'}}) }}
+					{{ form_widget(registrationForm.nombre, {'attr': {'class': 'form-control'}}) }}
+				</div>
+				<div class="form-group">
+					{{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+					{{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+				</div>
+				<div class="form-group">
+					{{ form_label(registrationForm.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+					{{ form_widget(registrationForm.password, {'attr': {'class': 'form-control'}}) }}
+				</div>
+				<div class="form-group">
+					{{ form_widget(registrationForm.agreeTerms) }}
+					{{ form_label(registrationForm.agreeTerms, 'Aceptar términos y condiciones', {'label_attr': {'class': 'form-check-label'}}) }}
+				</div>
+				<button type="submit" class="btn">Registro</button>
+				{{ form_end(registrationForm) }}
+				<p>
+					<a href="{{ path('index') }}">Volver al login</a>
+				</p>
+
+			</div>
+		</div>
+	</div>
+{% endblock %}
